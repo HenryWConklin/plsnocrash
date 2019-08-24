@@ -34,12 +34,13 @@ def build_letmetry_helptext(fname, args, kwargs):
     f_str = "Call to {0}(args={1}, kwargs={2}) failed.\n\n" \
         "Use {3}resume(arg1, ...) to call the function again with the given arguments and resume execution.\n" \
         "If the function raises another exception, you will end up at another console.\n\n" \
-        "Use skip(return_value) to skip the function call and resume execution as if it had returned 'return_value'.\n\n" \
-        "Global and local variables are avaiable for all scopes on the call stack under the list call_stack. \n" \
-        "e.g. call_stack[0]['x'] returns the variable 'x' from {0} (the failing function), \n and call_stack[1]['y']" \
+        "Use skip(return_value) to skip the function call and resume execution as if it had " \
+            "returned 'return_value'.\n\n" \
+        "Global and local variables are available for all scopes on the call stack under the list call_stack. \n" \
+        "e.g. call_stack[0]['x'] returns the variable 'x' from {0} (the failing function), \nand call_stack[1]['y'] " \
         "returns the variable 'y' from the function that called {0}.\n\n" \
         "The original positional arguments are available as the tuple 'args', \n" \
-        "and keyword arguemts are available as 'kwargs'.\n\n" \
+        "and keyword arguments are available as the dictionary 'kwargs'.\n\n" \
         "Use quit() or exit() to give up and stop the whole program."
     return f_str.format(fname, str(args), str(kwargs), resume_str)
 
