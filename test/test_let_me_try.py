@@ -8,8 +8,9 @@ def wrapped_id(x):
 
 @let_me_try
 def wrapped_crash(x):
-    if x:
-        raise ValueError()
+    if x is True:
+        raise ValueError('An error')
+    return x
 
 class TestLet_me_try(TestCase):
     def test_no_error(self):
@@ -66,3 +67,20 @@ class TestLet_me_try(TestCase):
             # Call with no arguments, expects 1 argument
             wrapped_crash()
         # No crash, passed
+
+    def test_callstack_vars(self):
+        grab_me = "AAAAAAA"
+        streams = StdIOMonkeyPatch("call_stack[0]['grab_me']\nskip()\n")
+        with streams:
+            wrapped_crash(True)
+        out = streams.get_stdout()
+        self.assertIn(grab_me, out)
+
+    def test_skip_returnval(self):
+        streams = StdIOMonkeyPatch('skip(123)\n')
+        with streams:
+            retval = wrapped_crash(True)
+        self.assertEqual(retval, 123)
+
+
+
