@@ -36,8 +36,10 @@ def build_letmetry_helptext(fname, args, kwargs):
         "If the function raises another exception, you will end up at another console.\n\n" \
         "Use skip(return_value) to skip the function call and resume execution as if it had returned 'return_value'.\n\n" \
         "Global and local variables are avaiable for all scopes on the call stack under the list call_stack. \n" \
-        "e.g. call_stack[0]['x'] returns the variable 'x' from {0} (the failing function), \nand call_stack[1]['y']" \
+        "e.g. call_stack[0]['x'] returns the variable 'x' from {0} (the failing function), \n and call_stack[1]['y']" \
         "returns the variable 'y' from the function that called {0}.\n\n" \
+        "The original positional arguments are available as the tuple 'args', \n" \
+        "and keyword arguemts are available as 'kwargs'.\n\n" \
         "Use quit() or exit() to give up and stop the whole program."
     return f_str.format(fname, str(args), str(kwargs), resume_str)
 
@@ -49,10 +51,53 @@ def let_me_try(f):
     from all other functions on the call stack. You can use this interpreter to fix whatever went wrong with the
     function and then resume execution, or you can skip the function all together with some simulated return value.
 
+    Example:
+
     ::
 
-        pickle.dump(obj, 'test.pkl') # oops, that should be a file object
-        >>> resume(args[0], open('test.pkl', 'wb'))
+        root@710027b06106:/plsnocrash/examples# cat let_me_try.py
+        import plsnocrash
+
+        import time
+        import pickle
+
+        def train():
+            time.sleep(10)
+            return [1,2,3,4,5]
+
+        @plsnocrash.let_me_try
+        def save(x):
+            # Oops, that should be a file object, not a string
+            pickle.dump(x, 'test.pkl')
+
+        if __name__ == '__main__':
+            x = train()
+            save(x)
+            print("All done!")
+        root@710027b06106:/plsnocrash/examples# python let_me_try.py
+        Caught exception: file must have a 'write' attribute
+        Traceback (most recent call last):
+          File "/usr/local/lib/python3.7/site-packages/plsnocrash/plsnocrash.py", line 65, in wrapper
+            return f(*args, **kwargs)
+          File "let_me_try.py", line 13, in save
+            pickle.dump(x, 'test.pkl')
+        TypeError: file must have a 'write' attribute
+        Call to save(args=([1, 2, 3, 4, 5],), kwargs={}) failed.
+
+        ...
+        [Some help text]
+        ...
+
+        >>> import pickle
+        >>> pickle.dump(args[0], open('test.pkl','wb'))
+        >>> skip()
+        Call skipped
+        >>>
+        Resuming execution
+        All done!
+        root@710027b06106:/plsnocrash/examples# ls
+        test.pkl
+
 
     :param f: Function to wrap
     :return: Wrapped function
@@ -112,7 +157,35 @@ def let_me_try(f):
 def retry(limit=1):
     """
     Retry a failing function `n` times or until it executes successfully. If the function does not complete
-    successfully by the nth retry, then the exception will be reraised for the executing code to handle
+    successfully by the nth retry, then the exception will be reraised for the executing code to handle.
+
+    Example:
+
+    ::
+
+        root@710027b06106:/plsnocrash/examples# cat retry.py
+        import plsnocrash
+
+        fail_counter = 0
+
+        @plsnocrash.retry(5)
+        def get_data():
+            global fail_counter
+            # Fail three times before completing
+            if fail_counter < 3:
+                fail_counter += 1
+                raise ValueError("Something went wrong")
+            return "some data"
+
+
+        if __name__ == '__main__':
+            print(get_data())
+        root@710027b06106:/plsnocrash/examples# python retry.py
+        Caught exception: Something went wrong, retry 1/5
+        Caught exception: Something went wrong, retry 2/5
+        Caught exception: Something went wrong, retry 3/5
+        some data
+
 
     :param f: Function to wrap
     :param limit: int, number of retries. If None then retry forever. Default 1.
