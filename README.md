@@ -1,5 +1,10 @@
 # PlsNoCrash
 
+## Setup
+This package has no dependencies, you can install it with pip:
+
+```pip install plsnocrash```
+
 ## Let Me Try
 Have you ever had some compute-intensive code run for hours only for it to crash right
 at the end for some inane reason? I have, and it's usually the bit where I save the data
