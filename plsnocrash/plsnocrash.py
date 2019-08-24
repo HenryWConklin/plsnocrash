@@ -43,6 +43,20 @@ def build_letmetry_helptext(fname, args, kwargs):
 
 
 def let_me_try(f):
+    """
+    Decorator that drops to an interactive interpreter if the wrapped function raises an exception. The interpreter
+    has access to all of the local variables available in the wrapped function when it crashed, as well as the variables
+    from all other functions on the call stack. You can use this interpreter to fix whatever went wrong with the
+    function and then resume execution, or you can skip the function all together with some simulated return value.
+
+    ::
+
+        pickle.dump(obj, 'test.pkl') # oops, that should be a file object
+        >>> resume(args[0], open('test.pkl', 'wb'))
+
+    :param f: Function to wrap
+    :return: Wrapped function
+    """
     def wrapper(*args, **kwargs):
         run_again = True
         _ret_val = None
@@ -132,7 +146,7 @@ def retry(limit=1):
                     try:
                         return f(*args, **kwargs)
                     except Exception as e:
-                        print("Caught exception {}, retry {:d}/{:d}".format(e, i+1, limit))
+                        print("Caught exception: {}, retry {:d}/{:d}".format(e, i+1, limit))
                         # Reraise exception if does not succeed by final retry
                         if i == limit:
                             raise e
