@@ -58,36 +58,3 @@ class StdIOMonkeyPatch:
         sys.stdout = self.orig_stdout
         sys.stderr = self.orig_stderr
 
-
-class StdInMonkeyPatch:
-    def __init__(self, text):
-        self.text = text
-
-    def __enter__(self):
-        # Save original stdin so we can put it back later
-        self.stdin_orig = sys.stdin
-
-        # Replace stdin with a buffer holding the given text
-        self.buff = StringIO(self.text)
-        sys.stdin = self.buff
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Put things back as they were
-        sys.stdin = self.stdin_orig
-        self.buff.close()
-
-
-class StdOutMonkeyPatch:
-    def __init__(self):
-        self.buff = StringIO()
-
-    def __enter__(self):
-        # Save original stdin so we can put it back later
-        self.stdout_orig = sys.stdout
-
-        # Replace stdout with our buffer so we can see what was printed
-        sys.stdout = self.buff
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Put stdout back as it was
-        sys.stdout = self.stdout_orig

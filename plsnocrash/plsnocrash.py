@@ -31,13 +31,15 @@ def build_letmetry_helptext(fname, args, kwargs):
         resume_str = f"{fname}(arg1, ...) or "
     else:
         resume_str = ''
-    return f"Call to {fname}(args={args}, kwargs={kwargs}) failed.\n\n" \
-        f"Use {resume_str}resume(arg1, ...) to call the function again with the given arguments and resume execution.\n" \
-        f"If the function raises another exception, you will end up at another console.\n\n" \
-        f"Use skip(return_value) to skip the function call and resume execution as if it had returned 'return_value'.\n\n" \
-        f"Global and local variables are avaiable for all scopes on the call stack under the list call_stack. \n" \
-        f"e.g. call_stack[0]['x'] returns the variable 'x' from {fname} (the failing function), \nand call_stack[1]['y']" \
-        f"returns the variable 'y' from the function that called {fname}."
+    f_str = "Call to {0}(args={1}, kwargs={2}) failed.\n\n" \
+        "Use {3}resume(arg1, ...) to call the function again with the given arguments and resume execution.\n" \
+        "If the function raises another exception, you will end up at another console.\n\n" \
+        "Use skip(return_value) to skip the function call and resume execution as if it had returned 'return_value'.\n\n" \
+        "Global and local variables are avaiable for all scopes on the call stack under the list call_stack. \n" \
+        "e.g. call_stack[0]['x'] returns the variable 'x' from {0} (the failing function), \nand call_stack[1]['y']" \
+        "returns the variable 'y' from the function that called {0}.\n\n" \
+        "Use quit() or exit() to give up and stop the whole program."
+    return f_str.format(fname, str(args), str(kwargs), resume_str)
 
 
 def let_me_try(f):
@@ -93,5 +95,47 @@ def let_me_try(f):
     return wrapper
 
 
-def try_again(f):
-    pass
+def retry(limit=1):
+    """
+    Retry a failing function `n` times or until it executes successfully.
+
+    :param f: Function to wrap
+    :param limit: int, number of retries. If None then retry forever. Default 1.
+    :type limit: int
+    :return: Wrapped function
+    """
+    def retry_decorator(f):
+        if not (limit is None or isinstance(limit, int)):
+            raise ValueError('Invalid repeat limit', limit)
+        if limit is None:
+            def inf_wrapper(*args, **kwargs):
+                i = 1
+                while True:
+                    try:
+                        return f(*args, **kwargs)
+                    except Exception as e:
+                        print("Caught exception {}, retry {:d}/inf".format(e, i))
+                        i += 1
+                        continue
+            return inf_wrapper
+        else:
+            def wrapper(*args, **kwargs):
+                for i in range(limit+1):
+                    try:
+                        return f(*args, **kwargs)
+                    except Exception as e:
+                        print("Caught exception {}, retry {:d}/{:d}".format(e, i+1, limit))
+
+            return wrapper
+    # if used as a decorator without an argument, default to 1
+    if callable(limit):
+        f = limit
+        limit = 1
+        return retry_decorator(f)
+    return retry_decorator
+
+
+
+
+
+
