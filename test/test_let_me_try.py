@@ -72,12 +72,16 @@ class TestLet_me_try(TestCase):
 
     def test_callstack_vars(self):
         grab_me = "AAAAAAA"
-        streams = StdIOMonkeyPatch("call_stack[0]['grab_me']\ncall_stack[0]['GLOBAL_VAR']\nskip()\n")
+        streams = StdIOMonkeyPatch("call_stack[0]['x']\n"
+                                   "call_stack[1]['grab_me']\n"
+                                   "call_stack[1]['GLOBAL_VAR']\n"
+                                   "skip()\n")
         with streams:
             wrapped_crash(True)
         out = streams.get_stdout()
         self.assertIn(grab_me, out)
         self.assertIn(GLOBAL_VAR, out)
+        self.assertIn('True', out)
 
     def test_skip_returnval(self):
         streams = StdIOMonkeyPatch('skip(123)\n')
