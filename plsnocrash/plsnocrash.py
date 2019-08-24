@@ -97,13 +97,21 @@ def let_me_try(f):
 
 def retry(limit=1):
     """
-    Retry a failing function `n` times or until it executes successfully.
+    Retry a failing function `n` times or until it executes successfully. If the function does not complete
+    successfully by the nth retry, then the exception will be reraised for the executing code to handle
 
     :param f: Function to wrap
     :param limit: int, number of retries. If None then retry forever. Default 1.
     :type limit: int
     :return: Wrapped function
     """
+
+    # Implementation notes:
+    # Three ways this could be called as a decorator:
+    # @retry -- Gets used as a raw decorator, limit is actually a function, this is handled below
+    # @retry() -- default value on limit actually gets used, limit is set to 1
+    # @retry(value) or @retry(limit=value) -- value is assigned to limit
+
     def retry_decorator(f):
         if not (limit is None or isinstance(limit, int)):
             raise ValueError('Invalid repeat limit', limit)
@@ -125,6 +133,9 @@ def retry(limit=1):
                         return f(*args, **kwargs)
                     except Exception as e:
                         print("Caught exception {}, retry {:d}/{:d}".format(e, i+1, limit))
+                        # Reraise exception if does not succeed by final retry
+                        if i == limit:
+                            raise e
 
             return wrapper
     # if used as a decorator without an argument, default to 1
@@ -133,9 +144,4 @@ def retry(limit=1):
         limit = 1
         return retry_decorator(f)
     return retry_decorator
-
-
-
-
-
 

@@ -19,7 +19,13 @@ class TestRetry(TestCase):
             raise ValueError()
         streams = StdIOMonkeyPatch()
         with streams:
-            fail1()
+            try:
+                fail1()
+            except ValueError as e:
+                # Expected error
+                pass
+            else:
+                self.fail('Did not reraise exception')
         out = streams.get_stdout()
         self.assertEqual(out.count(SIG_STR), 2)
 
@@ -30,7 +36,13 @@ class TestRetry(TestCase):
             raise ValueError()
         streams = StdIOMonkeyPatch()
         with streams:
-            fail5()
+            try:
+                fail5()
+            except ValueError as e:
+                # Expected error
+                pass
+            else:
+                self.fail('Did not reraise exception')
         out = streams.get_stdout()
         self.assertEqual(out.count(SIG_STR), 6)
 
