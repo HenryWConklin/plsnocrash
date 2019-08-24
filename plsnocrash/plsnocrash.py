@@ -13,11 +13,10 @@ def get_call_stack():
     # Build a list of the locals in each caller in the stack
     stack = []
     while frame is not None:
-        stack.append(frame.f_locals)
+        vars = dict(frame.f_globals, **frame.f_locals)
+        stack.append(vars)
         frame = frame.f_back
     return stack
-
-
 
 
 def let_me_try(f):
@@ -49,6 +48,7 @@ def let_me_try(f):
                     # Exit the console
                     sys.stdin = empty_stdin
                     print("Call skipped")
+
 
                 call_stack = get_call_stack()
                 locals = {

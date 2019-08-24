@@ -12,6 +12,8 @@ def wrapped_crash(x):
         raise ValueError('An error')
     return x
 
+GLOBAL_VAR = 'BBBBBBBBBBBB'
+
 class TestLet_me_try(TestCase):
     def test_no_error(self):
         x = 'a string'
@@ -70,11 +72,12 @@ class TestLet_me_try(TestCase):
 
     def test_callstack_vars(self):
         grab_me = "AAAAAAA"
-        streams = StdIOMonkeyPatch("call_stack[0]['grab_me']\nskip()\n")
+        streams = StdIOMonkeyPatch("call_stack[0]['grab_me']\ncall_stack[0]['GLOBAL_VAR']\nskip()\n")
         with streams:
             wrapped_crash(True)
         out = streams.get_stdout()
         self.assertIn(grab_me, out)
+        self.assertIn(GLOBAL_VAR, out)
 
     def test_skip_returnval(self):
         streams = StdIOMonkeyPatch('skip(123)\n')
