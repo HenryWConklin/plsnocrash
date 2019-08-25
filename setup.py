@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='plsnocrash',
-    version='0.1.1',
+    version='0.1.2',
     packages=['plsnocrash'],
     url='https://github.com/HenryWConklin/plsnocrash',
     license='',
