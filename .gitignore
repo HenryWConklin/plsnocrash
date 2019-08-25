@@ -1,8 +1,11 @@
 .idea/
 *.egg-info/
-venv/
 .coverage
 **/__pycache__/
 build/
 dist/
 *.pyc
+
+# Virtualenvs
+p36/
+p27

@@ -1,8 +1,43 @@
+from __future__ import print_function
 import inspect
+import keyword
+import string
 import traceback
 import code
 import sys
-from io import StringIO
+# Python 2 compat, StringIO moved
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+
+# Python 2 compat, no isidentifier method
+try:
+    isidentifier = str.isidentifier
+except AttributeError:
+    def isidentifier(ident):
+        """Determines if string is valid Python identifier."""
+
+        if not isinstance(ident, str):
+            raise TypeError("expected str, but got {!r}".format(type(ident)))
+
+        if not ident:
+            return False
+
+        if keyword.iskeyword(ident):
+            return False
+
+        first = '_' + string.lowercase + string.uppercase
+        if ident[0] not in first:
+            return False
+
+        other = first + string.digits
+        for ch in ident[1:]:
+            if ch not in other:
+                return False
+
+        return True
 
 
 def get_call_stack():
@@ -27,8 +62,8 @@ def get_call_stack():
 
 
 def build_letmetry_helptext(fname, args, kwargs):
-    if fname.isidentifier():
-        resume_str = f"{fname}(arg1, ...) or "
+    if isidentifier(fname):
+        resume_str = "{}(arg1, ...) or ".format(fname)
     else:
         resume_str = ''
     f_str = "Call to {0}(args={1}, kwargs={2}) failed.\n\n" \
@@ -104,11 +139,11 @@ def let_me_try(f):
     :return: Wrapped function
     """
     def wrapper(*args, **kwargs):
-        run_again = True
-        _ret_val = None
-        while run_again:
+        # Use this dictionary instead of the 'nonlocal' keyword to modify things in closures for python27 compatibility
+        nonlocal_dict = {'run_again': True, 'ret_val': None, 'args': args, 'kwargs': kwargs}
+        while nonlocal_dict['run_again']:
             try:
-                return f(*args, **kwargs)
+                return f(*nonlocal_dict['args'], **nonlocal_dict['kwargs'])
             except Exception as e:
                 print('Caught exception:', e)
                 traceback.print_exc()
@@ -116,18 +151,16 @@ def let_me_try(f):
                 empty_stdin = StringIO('')
 
                 def resume(*new_args, **new_kwargs):
-                    nonlocal args, kwargs
                     sys.stdin = empty_stdin
-                    args = new_args
-                    kwargs = new_kwargs
+                    nonlocal_dict['args'] = new_args
+                    nonlocal_dict['kwargs'] = new_kwargs
                     print("Trying call to {} again with new arguments".format(f.__name__))
 
                 def skip(ret_val=None):
-                    nonlocal run_again, _ret_val
                     # Set return value for once the console exits
-                    _ret_val = ret_val
+                    nonlocal_dict['ret_val'] = ret_val
                     # Stop the retry loop
-                    run_again = False
+                    nonlocal_dict['run_again'] = False
                     # Exit the console
                     sys.stdin = empty_stdin
                     print("Call skipped")
@@ -141,16 +174,15 @@ def let_me_try(f):
                     'call_stack': call_stack,
                 }
                 # Add the original name of f as an alias for resume, if it is a valid identifier (e.g. not <lambda>)
-                if f.__name__.isidentifier():
+                if isidentifier(f.__name__):
                     locals[f.__name__] = resume
 
                 code.interact(banner=build_letmetry_helptext(f.__name__, args, kwargs),
-                              local=locals,
-                              exitmsg='Resuming execution')
+                              local=locals)
                 if sys.stdin is empty_stdin:
                     sys.stdin = orig_stdin
         # Return the value passed to skip instead of a result from f
-        return _ret_val
+        return nonlocal_dict['ret_val']
 
     return wrapper
 
