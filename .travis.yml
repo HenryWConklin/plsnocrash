@@ -12,3 +12,4 @@ deploy:
   on:
     tags: true
   skip-existing: true
+  distributions: "sdist bdist_wheel"
