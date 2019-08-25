@@ -61,6 +61,10 @@ class TestRetry(TestCase):
         out = streams.get_stdout()
         self.assertEqual(out.count(SIG_STR), 11)
 
+    def test_invalid_limit(self):
+        self.assertRaises(ValueError, lambda: retry(-1)(lambda: 1/0))
+        self.assertRaises(ValueError, lambda: retry(-400)(lambda: 1/0))
+        self.assertRaises(ValueError, lambda: retry('None')(lambda: 1/0))
 
 
 

@@ -233,7 +233,7 @@ def retry(limit=1):
     # @retry(value) or @retry(limit=value) -- value is assigned to limit
 
     def retry_decorator(f):
-        if not (limit is None or isinstance(limit, int)):
+        if not (limit is None or (isinstance(limit, int) and limit >= 0)):
             raise ValueError('Invalid repeat limit', limit)
         if limit is None:
             def inf_wrapper(*args, **kwargs):

@@ -89,5 +89,9 @@ class TestLet_me_try(TestCase):
             retval = wrapped_crash(True)
         self.assertEqual(retval, 123)
 
-
+    def test_wrap_lambda(self):
+        streams = StdIOMonkeyPatch('"<lambda>" in locals()\nskip()\n')
+        with streams:
+            let_me_try(lambda: 1/0)()
+        self.assertIn("False\n", streams.get_stdout())
 

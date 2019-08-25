@@ -5,6 +5,8 @@
 build/
 dist/
 *.pyc
+.tox/
+htmlcov/
 
 # Virtualenvs
 p36/

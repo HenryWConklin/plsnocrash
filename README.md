@@ -1,5 +1,6 @@
 # PlsNoCrash
 [![Build Status](https://travis-ci.org/HenryWConklin/plsnocrash.svg?branch=master)](https://travis-ci.org/HenryWConklin/plsnocrash)
+[![codecov](https://codecov.io/gh/HenryWConklin/plsnocrash/branch/master/graph/badge.svg)](https://codecov.io/gh/HenryWConklin/plsnocrash)
 
 ## Setup
 This package has no dependencies, you can install it with pip:
