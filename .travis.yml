@@ -1,0 +1,15 @@
+language: python
+python:
+- '2.7'
+- '3.6'
+- '3.7'
+script: python -m unittest discover
+deploy:
+  provider: pypi
+  user: henrywconklin
+  password:
+    secure: iVkZ3ZKf798y4T1hwVenS19v9u3s7sNdWKhXMDK+E3lNvAMnD1FNSAGbKBe6Jb4xikVOY+bsYu87VAbguIGedQ8TLmu9mgSN6NTY7ppeWLI61YmSkiBAPT9GsxV+aZ0SOkoeWabV9BQtmNaZaV69dk/u/D0gKfZUX8IeSkAH4gPOiT56JIrrwqb6opIDPApjvMIs4UufB9ZWkYEEYPeYS8tgMf+mfolZHWlL1EqAke2VAlBwav1pW0/xPDhTZna216KOza7P7vnkCKjKBFMHDb4Z4hL2d1xxr3BH9OjGPGlWXYBCuUjwVM6iSWPNTrB9Aa1xdangkyMWwxJSv9w4EOCjK99tIy6B/7L6UZ3kq83cKaX8g8Sg+nbbC+eWbbso5x3ycaqPGXwNiGEA5uCRpBzthZz6+7SVrOQqxy6DeG3T+palAM+LkRotUwjLG1sea7P9t57b3UDTQD1/nMbR9yEWEqWDii99serYHahYUQh5TTY/iLb/Ak1IEXU+854Y7ehTmzvPW5QFO1xs8f07XU7V1atq29wmD2sLT0fBqTW8T0iEIFU1XP9dr08JvKUYnta0bUkllOGb3y4nkiqJP8oMBZwWIENict+McaHihJz4gtxilai2XXtp4w8Ybr8BMOQAVGNoHMS1woFt66SRZBJhTumUCfx8K+azPB6t44E=
+  on:
+    tags: true
+  skip-existing: true
+  distributions: "sdist bdist_wheel"
