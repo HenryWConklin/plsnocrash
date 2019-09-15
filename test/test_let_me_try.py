@@ -12,6 +12,15 @@ def wrapped_crash(x):
         raise ValueError('An error')
     return x
 
+@let_me_try
+def call_deepcrash(n):
+    deep_crash(n)
+
+def deep_crash(n):
+    if n <= 0:
+        raise ValueError('Hit bottom')
+    deep_crash(n-1)
+
 GLOBAL_VAR = 'BBBBBBBBBBBB'
 
 class TestLet_me_try(TestCase):
@@ -82,6 +91,17 @@ class TestLet_me_try(TestCase):
         self.assertIn(grab_me, out)
         self.assertIn(GLOBAL_VAR, out)
         self.assertIn('True', out)
+
+    def test_callstack_below_wrap(self):
+        grab_me = "AAAAA"
+        streams = StdIOMonkeyPatch("[c.get('n', None) for c in call_stack]\n"
+                                   "[c.get('grab_me', None) for c in call_stack]\n"
+                                   "skip()\n")
+        with streams:
+            call_deepcrash(5)
+        out = streams.get_stdout()
+        self.assertIn('[0, 1, 2, 3, 4, 5', out)
+        self.assertIn("[None, None, None, None, None, None, None, '{}'".format(grab_me), out)
 
     def test_skip_returnval(self):
         streams = StdIOMonkeyPatch('skip(123)\n')

@@ -47,17 +47,16 @@ def get_call_stack():
     # Skip the function that called this function
     frame = frame.f_back
 
-    # Build a list of the locals in each caller in the stack
+    # Build a list of the locals in each caller in the stack above/before the wrapper
     stack = []
     while frame is not None:
         vars = dict(frame.f_globals, **frame.f_locals)
         stack.append(vars)
         frame = frame.f_back
 
-    # Get the vars for the function that failed
-    base_frame = inspect.trace()[-1][0]
-    base_vars = dict(base_frame.f_globals, **base_frame.f_locals)
-    stack.insert(0, base_vars)
+    # Get the vars for the calls below/after the wrapper
+    trace = inspect.trace()[1:]
+    stack = [dict(frame[0].f_locals, **frame[0].f_globals) for frame in reversed(trace)] + stack
     return stack
 
 
